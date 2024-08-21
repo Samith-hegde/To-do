@@ -19,10 +19,17 @@ const taskForm = () => {
 
 const addTask = () => {
     const task = taskForm();
-    tasks.push(task);
     const submitButton = task.querySelector('.submit-button');
     submitButton.addEventListener('click', () => {
-        renderTasks();
+        const taskName = task.querySelector('input[placeholder="Task Name"]').value;
+        const taskDescription = task.querySelector('input[placeholder="Task Description"]').value;
+
+        if (taskName && taskDescription) {
+            tasks.push({ name: taskName, description: taskDescription });
+            renderTasks();
+        } else {
+            alert('Please fill in all fields');
+        }
     })
     container.appendChild(task);
 }
@@ -31,8 +38,19 @@ const renderTasks = () => {
     container.innerHTML = '';
     container.appendChild(title);
     container.appendChild(addTaskButton);
-    tasks.forEach(task => {
-        container.appendChild(task);
+    tasks.forEach((task) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.classList.add('task');
+
+        const taskName = document.createElement('h3');
+        taskName.textContent = task.name;
+
+        const taskDescription = document.createElement('p');
+        taskDescription.textContent = task.description;
+
+        taskDiv.appendChild(taskName);
+        taskDiv.appendChild(taskDescription);
+        container.appendChild(taskDiv);
     });
 }
 
@@ -48,3 +66,5 @@ addTaskButton.addEventListener('click', () => {
 
 container.appendChild(title);
 container.appendChild(addTaskButton);
+
+renderTasks();

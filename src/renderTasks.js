@@ -1,4 +1,5 @@
 const renderTasks = (tasks, container, onAddTask) => {
+
     container.innerHTML = '';
 
     const title = document.createElement('h2');

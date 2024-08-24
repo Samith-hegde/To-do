@@ -1,0 +1,120 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Header styling */
+header {
+    background-color: #6200ee;
+    color: #ffffff;
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2rem;
+    margin: 0;
+}
+
+/* Main content styling */
+main {
+    flex: 1;
+    width: 100%;
+    max-width: 1000px;
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+/* Task container styling */
+#tasks-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+}
+
+/* Task styling */
+.task {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.task h3 {
+    font-size: 1.25rem;
+    margin-bottom: 5px;
+}
+
+.task p {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.task:last-child {
+    border-bottom: none;
+}
+
+.done {
+    text-decoration: line-through;
+}
+
+/* Add Task button styling */
+button {
+    background-color: #6200ee;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #3700b3;
+}
+
+/* Add Task form styling */
+form {
+    margin-top: 20px;
+}
+
+form input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form button {
+    width: 100%;
+}
+
+/* Footer styling */
+footer {
+    background-color: #6200ee;
+    color: #ffffff;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: auto;
+}

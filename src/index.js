@@ -1,11 +1,11 @@
 import { renderTasks } from './renderTasks';
-import { addTask } from './addTask';
+import { taskManager } from './taskManager';
+import './styles/styles.css';
 
-const initApp = () => {
-    const container = document.getElementById('container');
-    const tasks = [];
+const container = document.getElementById('tasks-container');
 
-    renderTasks(tasks, container, addTask);
-}
+renderTasks(taskManager.getTasks(), container);
 
-initApp();
+taskManager.onTasksUpdated((updatedTasks) => {
+    renderTasks(updatedTasks, container);
+})

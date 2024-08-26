@@ -1,4 +1,60 @@
-import { taskManager } from './taskManager.js';
+import { projectManager, taskManager } from './taskManager.js';
+
+const renderNavBar = (projects, navBar) => {
+    navBar.innerHTML = '';
+
+    const allTasksButton = document.createElement('button');
+    allTasksButton.textContent = 'All Tasks';
+
+    allTasksButton.addEventListener('click', () => {
+        projectManager.setActiveProject(projectManager.projects[0]);
+    });
+
+    const projectsDiv = document.createElement('h3');
+    projectsDiv.textContent = 'Projects';
+    navBar.appendChild(projectsDiv);
+
+    const newProject = document.createElement('div');
+
+    const projectName = document.createElement('input');
+    projectName.setAttribute('placeholder', 'Project Name');
+    newProject.appendChild(projectName);
+
+    const plusButton = document.createElement('button');    
+    plusButton.textContent = '+';
+    newProject.appendChild(plusButton);
+
+    newProject.style.display = 'none';
+    projectsDiv.appendChild(newProject);
+
+    const addProjectButton = document.createElement('button');
+    addProjectButton.textContent = 'Add Project';
+    projectsDiv.appendChild(addProjectButton);
+
+    addProjectButton.addEventListener('click', () => {
+        newProject.style.display = 'block';
+    });
+
+    plusButton.addEventListener('click', () => {
+        newProject.style.display = 'none';
+        projectManager.addProject(projectName.value);
+    });
+
+    projects.forEach((project) => {
+        const projectDiv = document.createElement('div');
+        projectDiv.classList.add('project');
+
+        const projectName = document.createElement('button');
+        projectName.textContent = project.name;
+        projectDiv.appendChild(projectName);
+
+        projectsDiv.appendChild(projectDiv);
+
+        projectName.addEventListener('click', () => {
+            projectManager.setActiveProject(project);
+        });
+    });
+}
 
 const renderTasks = (tasks, container) => {
     container.innerHTML = '';
@@ -120,4 +176,4 @@ const renderEditTaskForm = (container, task) => {
     });
 }
 
-export { renderTasks };
+export { renderNavBar, renderTasks };

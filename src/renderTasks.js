@@ -8,6 +8,7 @@ const renderNavBar = (projects, navBar) => {
 
     allTasksButton.addEventListener('click', () => {
         projectManager.setActiveProject(projectManager.projects[0]);
+        renderTasks(projectManager.projects[0].tasks, document.getElementById('tasks-container'));
     });
 
     const projectsDiv = document.createElement('h3');
@@ -52,8 +53,10 @@ const renderNavBar = (projects, navBar) => {
 
         projectName.addEventListener('click', () => {
             projectManager.setActiveProject(project);
+            renderTasks(project.tasks, document.getElementById('tasks-container'));
         });
     });
+
 }
 
 const renderTasks = (tasks, container) => {
@@ -97,17 +100,17 @@ const renderTasks = (tasks, container) => {
         
         container.appendChild(taskDiv);
 
-        checkbox.addEventListener('change', () => {
-            taskDiv.classList.toggle('done');
-        });
-
         editButton.addEventListener('click', () => {
-            renderEditTaskForm(container, task);
+            const localIndex = taskManager.getTasks().indexOf(task);
+            const relevantTask = taskManager.projectManager.projects[0].tasks.find((t) => t.name === task.name);
+            const globalIndex = taskManager.projectManager.projects[0].tasks.indexOf(relevantTask);
+            console.log(localIndex);
+            console.log(globalIndex);
+            renderEditTaskForm(localIndex, globalIndex, container, task);
         });
 
         deleteButton.addEventListener('click', () => {
-            const index = taskManager.getTasks().indexOf(task);
-            taskManager.deleteTask(index);
+            taskManager.deleteTask(task);
         });
     });
 
@@ -144,7 +147,7 @@ const renderAddTaskForm = (container) => {
     });
 }
 
-const renderEditTaskForm = (container, task) => {
+const renderEditTaskForm = (localIndex, globalIndex, container, task) => {
     const form = document.createElement('form');
 
     const nameInput = document.createElement('input');
@@ -170,8 +173,7 @@ const renderEditTaskForm = (container, task) => {
 
     submitButton.addEventListener('click', (e) => {
         e.preventDefault();
-        const index = taskManager.getTasks().indexOf(task);
-        taskManager.editTask(index, nameInput.value, descriptionInput.value, dueDateInput.value);
+        taskManager.editTask( localIndex, globalIndex, nameInput.value, descriptionInput.value, dueDateInput.value );
         form.reset();
     });
 }

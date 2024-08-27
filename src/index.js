@@ -5,8 +5,8 @@ import './styles/styles.css';
 const container = document.getElementById('tasks-container');
 const navBar = document.querySelector('.nav-bar');
 
-renderNavBar(projectManager.getProjects(), navBar);
 renderTasks(taskManager.getTasks(), container);
+renderNavBar(projectManager.getProjects(), navBar);
 
 projectManager.onProjectsUpdated((updatedProjects) => {
     renderNavBar(updatedProjects, navBar);

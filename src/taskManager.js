@@ -1,6 +1,6 @@
 class projectsManager {
     constructor() {
-        this.projects = [{ name: 'All Tasks', tasks: [], done: false }];
+        this.projects = [{ name: 'All Tasks', tasks: [] }];
         this.activeProject = this.projects[0];
     }
 
@@ -15,7 +15,7 @@ class projectsManager {
 
     addProject(name) {
         if (name) {
-            this.projects.push({ name, tasks: [], done: false });
+            this.projects.push({ name, tasks: [] });
             this.triggerUpdate();
         } else {
             alert('Please fill in project name');
@@ -56,7 +56,9 @@ class tasksManager {
 
     editTask(localIndex, globalIndex, name, description, dueDate) {
         if (name && description && dueDate) {
-            this.projectManager.activeProject.tasks[localIndex] = { name, description, dueDate };
+            if (localIndex !== undefined) {
+                this.projectManager.activeProject.tasks[localIndex] = { name, description, dueDate };
+            }
             this.projectManager.projects[0].tasks[globalIndex] = { name, description, dueDate };
             this.triggerUpdate();
         } else {
@@ -64,22 +66,21 @@ class tasksManager {
         }
     }
 
-    deleteTask(task) {
-        const index = taskManager.getTasks().indexOf(task);
-        this.projectManager.activeProject.tasks.splice(index, 1);
-        if (this.projectManager.activeProject.name !== 'All Tasks') {
-            this.projectManager.projects[0].tasks.splice(index, 1);
+    deleteTask(localIndex, globalIndex) {
+        if (localIndex !== undefined) {
+            this.projectManager.activeProject.tasks.splice(localIndex, 1);
         }
+        this.projectManager.projects[0].tasks.splice(globalIndex, 1);
         this.triggerUpdate();
     }
 
-    toggleTaskDone(index) {
+    /*toggleTaskDone(index) {
         this.projectManager.activeProject.tasks[index].done = !this.projectManager.activeProject.tasks[index].done;
         if (this.projectManager.activeProject.name !== 'All Tasks') {
             this.projectManager.projects[0].tasks[index].done = !this.projectManager.projects[0].tasks[index].done;
         }
         this.triggerUpdate();
-    }
+    }*/
 
     onTasksUpdated(callback) {
         this.updateCallback = callback;
@@ -88,9 +89,7 @@ class tasksManager {
     triggerUpdate() {
         if (this.updateCallback) {
             this.updateCallback(this.projectManager.activeProject.tasks);
-            if (this.projectManager.activeProject.name !== 'All Tasks') {
-                this.updateCallback(this.projectManager.projects[0].tasks);
-            }
+            this.updateCallback(this.projectManager.projects[0].tasks);
         }
     }
 }

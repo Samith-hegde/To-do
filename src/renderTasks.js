@@ -56,14 +56,37 @@ const renderNavBar = (projects, navBar) => {
             renderTasks(project.tasks, document.getElementById('tasks-container'));
         });
     });
+}
 
+const identifyIndices = (task) => {
+    let localIndex;
+    let globalIndex;
+    let relevantTask;
+    if (taskManager.projectManager.activeProject.name === 'All Tasks') {
+        globalIndex = taskManager.projectManager.projects[0].tasks.indexOf(task);
+        for (let i=1; i<taskManager.projectManager.projects.length; i++) {
+            relevantTask = taskManager.projectManager.projects[i].tasks.find((t) => t.name === task.name)
+            if (relevantTask) {
+                const relevantProject = taskManager.projectManager.projects[i];
+                localIndex = relevantProject.tasks.indexOf(relevantTask);
+                taskManager.projectManager.setActiveProject(relevantProject);
+                break;
+            }
+        }
+    } else {
+        localIndex = taskManager.projectManager.activeProject.tasks.indexOf(task); 
+        relevantTask = taskManager.projectManager.projects[0].tasks.find((t) => t.name === task.name);
+        globalIndex = taskManager.projectManager.projects[0].tasks.indexOf(relevantTask);    
+    }         
+    return { localIndex, globalIndex };
 }
 
 const renderTasks = (tasks, container) => {
     container.innerHTML = '';
 
     const title = document.createElement('h2');
-    title.textContent = 'Tasks';
+    const text = projectManager.activeProject.name;
+    title.textContent = text;
     container.appendChild(title);
 
     const addTaskButton = document.createElement('button');
@@ -101,16 +124,13 @@ const renderTasks = (tasks, container) => {
         container.appendChild(taskDiv);
 
         editButton.addEventListener('click', () => {
-            const localIndex = taskManager.getTasks().indexOf(task);
-            const relevantTask = taskManager.projectManager.projects[0].tasks.find((t) => t.name === task.name);
-            const globalIndex = taskManager.projectManager.projects[0].tasks.indexOf(relevantTask);
-            console.log(localIndex);
-            console.log(globalIndex);
+            const { localIndex, globalIndex } = identifyIndices(task);
             renderEditTaskForm(localIndex, globalIndex, container, task);
         });
 
         deleteButton.addEventListener('click', () => {
-            taskManager.deleteTask(task);
+            const { localIndex, globalIndex } = identifyIndices(task);
+            taskManager.deleteTask(localIndex, globalIndex);
         });
     });
 
@@ -144,6 +164,7 @@ const renderAddTaskForm = (container) => {
         e.preventDefault();
         taskManager.addTask(nameInput.value, descriptionInput.value, dueDateInput.value);
         form.reset();
+        renderTasks(taskManager.getTasks(), document.getElementById('tasks-container'));
     });
 }
 
@@ -175,6 +196,7 @@ const renderEditTaskForm = (localIndex, globalIndex, container, task) => {
         e.preventDefault();
         taskManager.editTask( localIndex, globalIndex, nameInput.value, descriptionInput.value, dueDateInput.value );
         form.reset();
+        renderTasks(taskManager.getTasks(), document.getElementById('tasks-container'));
     });
 }
 

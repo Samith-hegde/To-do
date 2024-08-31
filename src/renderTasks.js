@@ -5,15 +5,39 @@ const renderNavBar = (projects, navBar) => {
 
     const allTasksButton = document.createElement('button');
     allTasksButton.textContent = 'All Tasks';
+    allTasksButton.classList.add('all-tasks-button');
+    navBar.appendChild(allTasksButton);
 
     allTasksButton.addEventListener('click', () => {
         projectManager.setActiveProject(projectManager.projects[0]);
-        renderTasks(projectManager.projects[0].tasks, document.getElementById('tasks-container'));
+        renderTasks(document.getElementById('tasks-container'));
     });
 
-    const projectsDiv = document.createElement('h3');
-    projectsDiv.textContent = 'Projects';
+    const projectsDiv = document.createElement('div');
+    projectsDiv.classList.add('projects');
     navBar.appendChild(projectsDiv);
+
+    const title = document.createElement('h3');
+    title.textContent = 'Projects';
+    projectsDiv.appendChild(title);
+
+    projects.forEach((project) => {
+        if (project.name !== 'All Tasks') {
+            const projectDiv = document.createElement('div');
+            projectDiv.classList.add('project');
+    
+            const projectName = document.createElement('button');
+            projectName.textContent = project.name;
+            projectDiv.appendChild(projectName);
+    
+            projectsDiv.appendChild(projectDiv);
+    
+            projectName.addEventListener('click', () => {
+                projectManager.setActiveProject(project);
+                renderTasks(document.getElementById('tasks-container'));
+            });    
+        }
+    });
 
     const newProject = document.createElement('div');
 
@@ -28,60 +52,23 @@ const renderNavBar = (projects, navBar) => {
     newProject.style.display = 'none';
     projectsDiv.appendChild(newProject);
 
-    const addProjectButton = document.createElement('button');
-    addProjectButton.textContent = 'Add Project';
-    projectsDiv.appendChild(addProjectButton);
-
-    addProjectButton.addEventListener('click', () => {
-        newProject.style.display = 'block';
-    });
-
     plusButton.addEventListener('click', () => {
         newProject.style.display = 'none';
         projectManager.addProject(projectName.value);
     });
 
-    projects.forEach((project) => {
-        const projectDiv = document.createElement('div');
-        projectDiv.classList.add('project');
+    const addProjectButton = document.createElement('button');
+    addProjectButton.textContent = 'Add Project';
+    addProjectButton.classList.add('add-project-button');
+    projectsDiv.appendChild(addProjectButton);
 
-        const projectName = document.createElement('button');
-        projectName.textContent = project.name;
-        projectDiv.appendChild(projectName);
-
-        projectsDiv.appendChild(projectDiv);
-
-        projectName.addEventListener('click', () => {
-            projectManager.setActiveProject(project);
-            renderTasks(project.tasks, document.getElementById('tasks-container'));
-        });
+    addProjectButton.addEventListener('click', () => {
+        newProject.style.display = 'block';
+        addProjectButton.style.display = 'none';
     });
 }
 
-const identifyIndices = (task) => {
-    let localIndex;
-    let globalIndex;
-    let relevantTask;
-    if (taskManager.projectManager.activeProject.name === 'All Tasks') {
-        globalIndex = taskManager.projectManager.projects[0].tasks.indexOf(task);
-        for (let i=1; i<taskManager.projectManager.projects.length; i++) {
-            relevantTask = taskManager.projectManager.projects[i].tasks.find((t) => t.name === task.name)
-            if (relevantTask) {
-                const relevantProject = taskManager.projectManager.projects[i];
-                localIndex = relevantProject.tasks.indexOf(relevantTask);
-                taskManager.projectManager.setActiveProject(relevantProject);
-                break;
-            }
-        }
-    } else {
-        localIndex = taskManager.projectManager.activeProject.tasks.indexOf(task); 
-        relevantTask = taskManager.projectManager.projects[0].tasks.find((t) => t.name === task.name);
-        globalIndex = taskManager.projectManager.projects[0].tasks.indexOf(relevantTask);    
-    }         
-    return { localIndex, globalIndex };
-}
-
-const renderTasks = (tasks, container) => {
+const renderTasks = (container) => {
     container.innerHTML = '';
 
     const title = document.createElement('h2');
@@ -90,10 +77,14 @@ const renderTasks = (tasks, container) => {
     container.appendChild(title);
 
     const addTaskButton = document.createElement('button');
+    addTaskButton.classList.add('add-tasks-button');
     addTaskButton.textContent = 'Add Task';
     container.appendChild(addTaskButton);
 
-    tasks.forEach((task) => {
+    const relevantTasks = projectManager.activeProject.name === 'All Tasks' ?
+    taskManager.getAllTasks() : taskManager.getTasksForProject(projectManager.activeProject);
+
+    relevantTasks.forEach((task) => {
         const taskDiv = document.createElement('div');
         taskDiv.classList.add('task');
 
@@ -124,13 +115,11 @@ const renderTasks = (tasks, container) => {
         container.appendChild(taskDiv);
 
         editButton.addEventListener('click', () => {
-            const { localIndex, globalIndex } = identifyIndices(task);
-            renderEditTaskForm(localIndex, globalIndex, container, task);
+            renderEditTaskForm(container, task);
         });
 
         deleteButton.addEventListener('click', () => {
-            const { localIndex, globalIndex } = identifyIndices(task);
-            taskManager.deleteTask(localIndex, globalIndex);
+            taskManager.deleteTask(task.id);
         });
     });
 
@@ -164,11 +153,11 @@ const renderAddTaskForm = (container) => {
         e.preventDefault();
         taskManager.addTask(nameInput.value, descriptionInput.value, dueDateInput.value);
         form.reset();
-        renderTasks(taskManager.getTasks(), document.getElementById('tasks-container'));
+        renderTasks(document.getElementById('tasks-container'));
     });
 }
 
-const renderEditTaskForm = (localIndex, globalIndex, container, task) => {
+const renderEditTaskForm = (container, task) => {
     const form = document.createElement('form');
 
     const nameInput = document.createElement('input');
@@ -194,9 +183,9 @@ const renderEditTaskForm = (localIndex, globalIndex, container, task) => {
 
     submitButton.addEventListener('click', (e) => {
         e.preventDefault();
-        taskManager.editTask( localIndex, globalIndex, nameInput.value, descriptionInput.value, dueDateInput.value );
+        taskManager.editTask( task.id, nameInput.value, descriptionInput.value, dueDateInput.value );
         form.reset();
-        renderTasks(taskManager.getTasks(), document.getElementById('tasks-container'));
+        renderTasks(document.getElementById('tasks-container'));
     });
 }
 

@@ -1,6 +1,13 @@
-class projectsManager {
+import Task from './task.js';
+import { loadProjects, saveProjects, loadTasks, saveTasks } from './storage.js';
+
+class ProjectsManager {
     constructor() {
-        this.projects = [{ name: 'All Tasks', tasks: [] }];
+        if (loadProjects()) {
+            this.projects = loadProjects();
+        } else {
+            this.projects = [{ name: 'All Tasks', taskIds: [] }];
+        }
         this.activeProject = this.projects[0];
     }
 
@@ -15,7 +22,7 @@ class projectsManager {
 
     addProject(name) {
         if (name) {
-            this.projects.push({ name, tasks: [] });
+            this.projects.push({ name, taskIds: [] });
             this.triggerUpdate();
         } else {
             alert('Please fill in project name');
@@ -30,57 +37,63 @@ class projectsManager {
         if (this.updateCallback) {
             this.updateCallback(this.projects);
         }
+        saveProjects(this.projects);
     }
 }
 
-class tasksManager {
+class TasksManager {
     constructor(projectManager) {
         this.projectManager = projectManager;
+        if (loadTasks()) {
+            this.tasks = loadTasks();
+        } else {
+            this.tasks = [];
+        }
     }
 
-    getTasks() {
-        return this.projectManager.activeProject.tasks;
+    addTaskToProject(newTask) {
+        this.projectManager.activeProject.taskIds.push(newTask.id);
+        if(this.projectManager.activeProject.name !== 'All Tasks') {
+            this.projectManager.projects[0].taskIds.push(newTask.id);
+        }
     }
 
     addTask(name, description, dueDate) {
         if (name && description && dueDate) {
-            this.projectManager.activeProject.tasks.push({ name, description, dueDate });
-            if (this.projectManager.activeProject.name !== 'All Tasks') {
-                this.projectManager.projects[0].tasks.push({ name, description, dueDate });
-            }
+            const newTask = new Task(name, description, dueDate);
+            this.tasks.push(newTask);
+            this.addTaskToProject(newTask);
             this.triggerUpdate();
         } else {
             alert('Please fill in all fields');
         }
     }
 
-    editTask(localIndex, globalIndex, name, description, dueDate) {
-        if (name && description && dueDate) {
-            if (localIndex !== undefined) {
-                this.projectManager.activeProject.tasks[localIndex] = { name, description, dueDate };
-            }
-            this.projectManager.projects[0].tasks[globalIndex] = { name, description, dueDate };
+    editTask(taskId, updatedName, updatedDescription, updatedDueDate) {
+        const task = this.tasks.find(task => task.id === taskId);
+        if (task) {
+            task.name = updatedName;
+            task.description = updatedDescription;
+            task.dueDate = updatedDueDate;
             this.triggerUpdate();
-        } else {
-            alert('Please fill in all fields');
         }
     }
 
-    deleteTask(localIndex, globalIndex) {
-        if (localIndex !== undefined) {
-            this.projectManager.activeProject.tasks.splice(localIndex, 1);
-        }
-        this.projectManager.projects[0].tasks.splice(globalIndex, 1);
+    deleteTask(taskId) {
+        this.tasks = this.tasks.filter(task => task.id !== taskId);
+        this.projectManager.projects.forEach(project => {
+            project.taskIds = project.taskIds.filter(id => id !== taskId);
+        });
         this.triggerUpdate();
     }
 
-    /*toggleTaskDone(index) {
-        this.projectManager.activeProject.tasks[index].done = !this.projectManager.activeProject.tasks[index].done;
-        if (this.projectManager.activeProject.name !== 'All Tasks') {
-            this.projectManager.projects[0].tasks[index].done = !this.projectManager.projects[0].tasks[index].done;
-        }
-        this.triggerUpdate();
-    }*/
+    getTasksForProject(project) {
+        return project.taskIds.map(taskId => this.tasks.find(task => task.id === taskId));
+    }
+
+    getAllTasks() {
+        return this.tasks;
+    }
 
     onTasksUpdated(callback) {
         this.updateCallback = callback;
@@ -88,13 +101,13 @@ class tasksManager {
 
     triggerUpdate() {
         if (this.updateCallback) {
-            this.updateCallback(this.projectManager.activeProject.tasks);
-            this.updateCallback(this.projectManager.projects[0].tasks);
+            this.updateCallback(this.projectManager.activeProject.taskIds.map(taskId => this.tasks.find(task => task.id === taskId)));
         }
+        saveTasks(this.tasks);
     }
 }
 
-const projectManager = new projectsManager();
-const taskManager = new tasksManager(projectManager);
+const projectManager = new ProjectsManager();
+const taskManager = new TasksManager(projectManager);
 
 export { projectManager, taskManager };
